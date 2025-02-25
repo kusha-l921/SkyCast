@@ -31,27 +31,32 @@ class WeatherApp(QWidget):
 
     def get_weather(self):
         city = self.city_input.text()
-        API_KEY = "0455c907764d76d00d2b78e7616f2898"  
-        BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+        API_KEY = "95e1e75dacca4b929a0165428252502"
+        BASE_URL = "https://api.weatherapi.com/v1/current.json"
+        params = {"q": city, "key": API_KEY, "aqi": "no"}  
 
-        params = {"q": city, "appid": API_KEY, "units": "metric"}
+        try:
+            response = requests.get(BASE_URL, params=params)
+            if response.status_code == 200:
+                data = response.json()
 
-        response = requests.get(BASE_URL, params=params)
-        data = response.json()
+                weather = data["current"]["condition"]["text"]
+                temp = data["current"]["temp_c"]
+                humidity = data["current"]["humidity"]
+                wind_speed = data["current"]["wind_kph"]
 
-        if response.status_code == 200:
-            weather = data["weather"][0]["description"]
-            temp = data["main"]["temp"]
-            humidity = data["main"]["humidity"]
-            wind_speed = data["wind"]["speed"]
+                weather_info = (f"Weather: {weather}\n"
+                                f"Temperature: {temp}°C\n"
+                                f"Humidity: {humidity}%\n"
+                                f"Wind Speed: {wind_speed} kph")
+                self.result_label.setText(weather_info)
+            else:
+                data = response.json()
+                error_message = data.get("error", {}).get("message", "Unknown error")
+                self.result_label.setText(f"Error: {error_message}")
 
-            weather_info = (f"Weather: {weather}\n"
-                            f"Temperature: {temp}°C\n"
-                            f"Humidity: {humidity}%\n"
-                            f"Wind Speed: {wind_speed} m/s")
-            self.result_label.setText(weather_info)
-        else:
-            self.result_label.setText(f"Error: {data['message']}")
+        except requests.exceptions.RequestException as e:
+            self.result_label.setText(f"Request Error: {str(e)}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
