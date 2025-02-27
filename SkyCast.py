@@ -10,7 +10,7 @@ class WeatherApp(QWidget):
 
     def initUI(self):
         self.setWindowTitle("Weather Forecast")
-        self.setGeometry(100, 100, 300, 200)
+        self.setGeometry(100, 100, 350, 250)
 
         layout = QVBoxLayout()
 
@@ -32,23 +32,33 @@ class WeatherApp(QWidget):
     def get_weather(self):
         city = self.city_input.text()
         API_KEY = "95e1e75dacca4b929a0165428252502"
-        BASE_URL = "https://api.weatherapi.com/v1/current.json"
-        params = {"q": city, "key": API_KEY, "aqi": "no"}  
+        BASE_URL = "https://api.weatherapi.com/v1/forecast.json"  # Changed endpoint
+        params = {"q": city, "key": API_KEY, "aqi": "no", "days": 3}  # Added "days" for forecast
 
         try:
             response = requests.get(BASE_URL, params=params)
             if response.status_code == 200:
                 data = response.json()
 
-                weather = data["current"]["condition"]["text"]
+                # Get current weather
+                current_weather = data["current"]["condition"]["text"]
                 temp = data["current"]["temp_c"]
                 humidity = data["current"]["humidity"]
                 wind_speed = data["current"]["wind_kph"]
 
-                weather_info = (f"Weather: {weather}\n"
-                                f"Temperature: {temp}°C\n"
-                                f"Humidity: {humidity}%\n"
-                                f"Wind Speed: {wind_speed} kph")
+                forecast_info = "\n🔮 3-Day Forecast:\n"
+                for day in data["forecast"]["forecastday"]:
+                    date = day["date"]
+                    condition = day["day"]["condition"]["text"]
+                    max_temp = day["day"]["maxtemp_c"]
+                    min_temp = day["day"]["mintemp_c"]
+                    forecast_info += f"{date}: {condition}, {min_temp}°C - {max_temp}°C\n"
+
+                weather_info = (f"🌤️ Current Weather: {current_weather}\n"
+                                f"🌡 Temperature: {temp}°C\n"
+                                f"💧 Humidity: {humidity}%\n"
+                                f"🌬 Wind Speed: {wind_speed} kph\n"
+                                f"{forecast_info}")
                 self.result_label.setText(weather_info)
             else:
                 data = response.json()
