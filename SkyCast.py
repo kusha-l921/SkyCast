@@ -32,15 +32,14 @@ class WeatherApp(QWidget):
     def get_weather(self):
         city = self.city_input.text()
         API_KEY = "95e1e75dacca4b929a0165428252502"
-        BASE_URL = "https://api.weatherapi.com/v1/forecast.json"  # Changed endpoint
-        params = {"q": city, "key": API_KEY, "aqi": "no", "days": 3}  # Added "days" for forecast
+        BASE_URL = "https://api.weatherapi.com/v1/forecast.json"  
+        params = {"q": city, "key": API_KEY, "aqi": "no", "days": 3}  
 
         try:
             response = requests.get(BASE_URL, params=params)
             if response.status_code == 200:
                 data = response.json()
 
-                # Get current weather
                 current_weather = data["current"]["condition"]["text"]
                 temp = data["current"]["temp_c"]
                 humidity = data["current"]["humidity"]
